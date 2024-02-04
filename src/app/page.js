@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const [sseData, setSSEData] = useState([]);
-  const eventSource = new EventSource('/api/test');
+  const eventSource = new EventSource("/api/test-sse", {
+    withCredentials: true,
+  });
 
   useEffect(() => {
-
     eventSource.onmessage = (event) => {
       console.log(event.data)
       setSSEData([...sseData, JSON.parse(event.data)]);
     };
 
     eventSource.onerror = (error) => {
-      console.log(error);
+      console.log("The following error has occurred: ", error);
     }
 
     return () => {
