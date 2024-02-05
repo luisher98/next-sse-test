@@ -1,39 +1,22 @@
-export const runtime = "nodejs";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function longRunningResponse(req, res) {
-  let responseStream = new TransformStream();
-  const writer = responseStream.writable.getWriter();
+export default async function GET(req) {
+  const stream = new TransformStream();
+  const writer = stream.writable.getWriter();
   const encoder = new TextEncoder();
-  let closed = false;
 
-  const eventSource = new EventSource("http://localhost:5000/api/test-sse"); // Renamed to eventSource
+  const data = await fetch("http://localhost:5000/api/test-sse");
 
-  eventSource.onmessage = (e) => {
-    console.log(data);
-    writer.write(encoder.encode("data: " + e.data + "\n\n"));
-  };
+  writer.write(encoder.encode("data: " + JSON.stringify(data) + "\n\n"));
 
-  eventSource.onerror = async () => {
-    eventSource.close();
-  };
-
-  req.socket.on("close", () => {
-    eventSource.close();
-    res.end();
-  });
-
-  return new Response(responseStream.readable, {
+  return new NextResponse(stream.readable, {
+    status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Content-Type": "text/event-stream; charset=utf-8",
+      "Content-Type": "text/event-stream",
       Connection: "keep-alive",
       "Cache-Control": "no-cache, no-transform",
-      "X-Accel-Buffering": "no",
-      "Content-Encoding": "none",
     },
   });
 }
-
-
