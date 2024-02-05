@@ -1,3 +1,7 @@
+export const runtime = "nodejs";
+
+export const dynamic = "force-dynamic";
+
 export default async function longRunningResponse(req, res) {
   let responseStream = new TransformStream();
   const writer = responseStream.writable.getWriter();
@@ -32,4 +36,4 @@ export default async function longRunningResponse(req, res) {
   });
 }
 
-export const runtime = "edge"
+
